@@ -73,12 +73,21 @@ module.exports = class Merklie {
   }
 
   /**
-   * Returns a re-hashed document alias of hashFunction
-   * @param value
+   * Returns a re-hashed hex
+   * @param {*} value
+   * @param {boolean} noHash
    * @returns {*}
    */
-  reHash (value) {
-    return this.hashFunction(value)
+  reHash (value, noHash) {
+    if (!noHash) {
+      // If this is JSON, then we need to stringify it
+      if (typeof value === 'object') {
+        value = JSON.stringify(value)
+      }
+      // Hash the value
+      value = this.hashFunction(value)
+    }
+    return this._getBuffer(value).toString('hex')
   }
 
   /**
@@ -102,6 +111,11 @@ module.exports = class Merklie {
   addLeaf (value, doHash) {
     this.tree.isReady = false
     if (doHash) {
+      // If this is JSON, then we need to stringify it
+      if (typeof value === 'object') {
+        value = JSON.stringify(value)
+      }
+      // Hash the value
       value = this.hashFunction(value)
     }
     this.tree.leaves.push(this._getBuffer(value))

@@ -1,6 +1,6 @@
 {
   "name": "merklie",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create merkle trees, generate merkle proofs, and verify merkle proofs.",
   "main": "merklie.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "merkle"
   ],
   "author": "Scott Wyatt <scottwyatt86@gmail.com>",
-  "license": "MIT",
+  "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/scott-wyatt/merklie/issues"
   },

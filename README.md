@@ -31,7 +31,7 @@ const merklie = new Merklie(treeOptions) // treeOptions is optional
 
 ### addLeaf(value, doHash)
 
-Adds a value as a leaf to the tree. The value must be either a Buffer or a hex string, otherwise set the optional doHash to true to have your value hashed prior to being added to the tree. 
+Adds a value as a leaf to the tree. The value must be either a Buffer or a hex string, otherwise set the optional doHash to true to have your value hashed prior to being added to the tree. It returns the index of the leaf added. 
 
 ```js
 const hexData = '05ae04314577b2783b4be98211d1b72476c59e9c413cfb2afa2f0c68e0d93911'
@@ -43,7 +43,7 @@ merklie.addLeaf(otherData, true)
 
 ### addLeaves(valueArray, doHash)
 
-Adds an array of values as leaves to the tree. The values must be either a Buffers or a hex strings, otherwise set the optional doHash to true to have your values hashed prior to being added to the tree. 
+Adds an array of values as leaves to the tree. The values must be either a Buffers or a hex strings, otherwise set the optional doHash to true to have your values hashed prior to being added to the tree. Returns the indexes of the leaves added.
 
 ```js
 const hexData = ['05ae04314577b2783b4be98211d1b72476c59e9c413cfb2afa2f0c68e0d93911', 'c5ed1192d909d1af814f64c7dc9e6a4983a63891a2c59ed14448d90271cb5519', 
@@ -171,6 +171,15 @@ The proof process uses all the proof objects in the array to attempt to prove a 
 4. Hash that value and continue the process until you’ve gone through each item in the proof array.
 5. The final hash value should equal the merkleRoot value if the proof is valid, otherwise the proof is invalid.
 
+### dehydrate(toString)
+Returns a dehydrated version (from buffers to hashes) of the leaves to JSON. If toString is set to true, it will stringify the result
+
+### rehydrate(dehydratedLeaves)
+Returns a boolean if the operation was successful and rebuilds the hash tree from the dehydrated leaves.
+
+### reHash(value, noHash)
+Returns the hash of a given document.
+
 ## Common Usage
 
 ### Creating a tree and generating the proofs
@@ -191,7 +200,8 @@ const proof0 = merklie.getProof(0)
 const proof1 = merklie.getProof(1)
 const proof2 = merklie.getProof(2)
 
-merklie.resetTree() // use this when done with this tree and you intend on creating a new one
+// use this when done with this tree and you intend on creating a new one
+merklie.resetTree()
 
 ```
 

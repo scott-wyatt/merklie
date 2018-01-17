@@ -1,19 +1,19 @@
 /* global describe, it */
 
-var assert = require('assert')
-var crypto = require('crypto')
-var Merklie = require('../merklie')
+const assert = require('assert')
+const crypto = require('crypto')
+const Merklie = require('../merklie')
 
-var bLeft = Buffer.from('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb', 'hex')
-var bRight = Buffer.from('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c', 'hex')
-var mRoot = crypto.createHash('sha256').update(Buffer.concat([bLeft, bRight])).digest()
-var bLeftmd5 = Buffer.from('0cc175b9c0f1b6a831c399e269772661', 'hex')
-var bRightmd5 = Buffer.from('92eb5ffee6ae2fec3ad71c777531578f', 'hex')
-var mRootmd5 = crypto.createHash('md5').update(Buffer.concat([bLeftmd5, bRightmd5])).digest()
+const bLeft = Buffer.from('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb', 'hex')
+const bRight = Buffer.from('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c', 'hex')
+const mRoot = crypto.createHash('sha256').update(Buffer.concat([bLeft, bRight])).digest()
+const bLeftmd5 = Buffer.from('0cc175b9c0f1b6a831c399e269772661', 'hex')
+const bRightmd5 = Buffer.from('92eb5ffee6ae2fec3ad71c777531578f', 'hex')
+const mRootmd5 = crypto.createHash('md5').update(Buffer.concat([bLeftmd5, bRightmd5])).digest()
 
 describe('Test basic functions', function () {
   describe('make tree with no leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.makeTree()
 
     it('merkle root value should be null', function () {
@@ -22,7 +22,7 @@ describe('Test basic functions', function () {
   })
 
   describe('Default should be sha256', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
 
     it('merkle root value should be null', function () {
       assert.equal(merklie.hashLib, 'sha256')
@@ -45,16 +45,26 @@ describe('Test basic functions', function () {
 
   describe('Default should set hashLib sha256', function () {
     const merklie = new Merklie()
-    const one = merklie.hashFunction('doc')
+    const one = merklie.hashFunction('doc').toString('hex')
     const two = merklie.reHash('doc')
 
-    it.skip('merkle hashFunction value should equal reHash value', function () {
+    it('merkle hashFunction hex value should equal reHash value', function () {
       assert.equal(one, two)
     })
   })
 
+  describe('Hash a JSON object', function () {
+    const merklie = new Merklie()
+    const leaf = merklie.addLeaf({hello: 'world'}, true)
+
+    it('merkle hashFunction hex value should work', function () {
+      assert.equal(merklie.getLeaf(leaf), '93a23971a914e5eacbf0a8d25154cda309c3c1c72fbb9914d47c60f3cb681588')
+    })
+  })
+
+
   describe('make tree with addLeaves hex', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     const addedLeaves = merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -72,7 +82,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with addLeaves buffers', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       bLeft, bRight
     ])
@@ -84,7 +94,7 @@ describe('Test basic functions', function () {
   })
 
   describe('getLeaf after running makeTree', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -97,7 +107,7 @@ describe('Test basic functions', function () {
   })
 
   describe('getLeaf out of bounds returns null after running makeTree', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -111,7 +121,7 @@ describe('Test basic functions', function () {
   })
 
   describe('getLeaf before running makeTree', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -123,7 +133,7 @@ describe('Test basic functions', function () {
   })
 
   describe('getLeaf out of bounds returns null before running makeTree', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -136,7 +146,7 @@ describe('Test basic functions', function () {
   })
 
   describe('reset tree', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
       'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
@@ -151,7 +161,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with addLeaf hex', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
     merklie.addLeaf('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
     merklie.makeTree()
@@ -162,15 +172,15 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with addLeaves hex', function () {
-    var hashes = []
+    const hashes = []
     hashes.push('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
     hashes.push('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
 
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves(hashes)
     merklie.makeTree()
-    var targetProof0 = merklie.getProof(0)
-    var targetProof1 = merklie.getProof(1)
+    const targetProof0 = merklie.getProof(0)
+    const targetProof1 = merklie.getProof(1)
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
@@ -180,7 +190,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with addLeaf buffers', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
@@ -191,7 +201,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with addLeaf bad hex', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
 
     it('error should be thrown', function () {
       assert.throws(function () { merklie.addLeaf('nothexandnothashed') }, Error)
@@ -199,7 +209,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with 1 leaf', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb'
     ])
@@ -211,7 +221,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with 5 leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
       '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
@@ -227,7 +237,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with 5 leaves individually needing hashing', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf('a', true)
     merklie.addLeaf('b', true)
     merklie.addLeaf('c', true)
@@ -241,7 +251,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree with 5 leaves at once needing hashing', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves(['a', 'b', 'c', 'd', 'e'], true)
     merklie.makeTree()
 
@@ -251,14 +261,14 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree using makeBTCTree odd leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
 
-    var hashes = [
+    const hashes = [
       '1a02db5db5a24c5edc5b653051d8aaaddec3f9abc30354f7df358c49fe40f735',
       'd3f3eb471e368a27f5320ff7a961bed748519139435cf8348e84ebd6225d7150',
       '7cbcf6b5378e3e43b39734baa578efa501d02abf90289547f0e6621ee959f0e3'
     ]
-    for (var x = 0; x < hashes.length; x++) {
+    for (let x = 0; x < hashes.length; x++) {
       hashes[x] = hashes[x].match(/.{2}/g).reverse().join('')
     }
     merklie.addLeaves(hashes)
@@ -270,12 +280,12 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree using makeBTCTree one leaf', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
 
-    var hashes = [
+    const hashes = [
       '9c397f783042029888ec02f0a461cfa2cc8e3c7897f476e338720a2a86731c60'
     ]
-    for (var x = 0; x < hashes.length; x++) {
+    for (let x = 0; x < hashes.length; x++) {
       hashes[x] = hashes[x].match(/.{2}/g).reverse().join('')
     }
     merklie.addLeaves(hashes)
@@ -287,15 +297,15 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree using makeBTCTree even leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
 
-    var hashes = [
+    const hashes = [
       '6584fd6a4d0a96e27f1f0f8549a206bc9367134064d45decd2116ca7d73e6cc4',
       '7e2087abb091d059749a6bfd36840743d818de95a39975c18fc5969459eb00b2',
       'd45f9b209556d52db69a900703dacd934701bb523cd2a03bf48ec658133e511a',
       '5ec499041da320458cf1719d06af02fecc97d3178739f4d331c4fb84c764933d'
     ]
-    for (var x = 0; x < hashes.length; x++) {
+    for (let x = 0; x < hashes.length; x++) {
       hashes[x] = hashes[x].match(/.{2}/g).reverse().join('')
     }
     merklie.addLeaves(hashes)
@@ -307,7 +317,7 @@ describe('Test basic functions', function () {
   })
 
   describe('make tree using md5', function () {
-    var merklie = new Merklie(
+    const merklie = new Merklie(
       { hashType: 'md5' })
     merklie.addLeaves([bLeftmd5, bRightmd5])
     merklie.makeTree()
@@ -318,11 +328,11 @@ describe('Test basic functions', function () {
   })
 
   describe('proof left node', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
-    var proof = merklie.getProof(0)
+    const proof = merklie.getProof(0)
 
     it('proof array should be correct', function () {
       assert.equal(proof[0].right, 'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
@@ -330,11 +340,11 @@ describe('Test basic functions', function () {
   })
 
   describe('proof right node', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
-    var proof = merklie.getProof(1)
+    const proof = merklie.getProof(1)
 
     it('proof array should be correct', function () {
       assert.equal(proof[0].left, 'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
@@ -342,36 +352,36 @@ describe('Test basic functions', function () {
   })
 
   describe('proof left node binary', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
-    var proof = merklie.getProof(0, true)
+    const proof = merklie.getProof(0, true)
 
     it('binary proof array should be correct', function () {
-      var expectedResult = [Buffer.from([0x01]), Buffer.from('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c', 'hex')]
+      const expectedResult = [Buffer.from([0x01]), Buffer.from('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c', 'hex')]
       assert.deepEqual(proof, expectedResult)
     })
   })
 
   describe('proof right node binary', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
-    var proof = merklie.getProof(1, true)
+    const proof = merklie.getProof(1, true)
 
     it('binary proof array should be correct', function () {
-      var expectedResult = [Buffer.from([0x00]), Buffer.from('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb', 'hex')]
+      const expectedResult = [Buffer.from([0x00]), Buffer.from('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb', 'hex')]
       assert.deepEqual(proof, expectedResult)
     })
   })
 
   describe('proof one node', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.makeTree()
-    var proof = merklie.getProof(0)
+    const proof = merklie.getProof(0)
 
     it('proof array should be correct', function () {
       assert.deepEqual(proof, [])
@@ -379,12 +389,12 @@ describe('Test basic functions', function () {
   })
 
   describe('validate bad proof 2 leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaf(bLeft)
     merklie.addLeaf(bRight)
     merklie.makeTree()
-    var proof = merklie.getProof(1)
-    var isValid = merklie.validateProof(proof, bRight, 'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
+    const proof = merklie.getProof(1)
+    const isValid = merklie.validateProof(proof, bRight, 'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
 
     it('proof should be invalid', function () {
       assert.equal(isValid, false)
@@ -392,7 +402,7 @@ describe('Test basic functions', function () {
   })
 
   describe('validate bad proof 5 leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
       '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
@@ -401,8 +411,8 @@ describe('Test basic functions', function () {
       '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea'
     ])
     merklie.makeTree()
-    var proof = merklie.getProof(3)
-    var isValid = merklie.validateProof(proof, 'badc3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
+    const proof = merklie.getProof(3)
+    const isValid = merklie.validateProof(proof, 'badc3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
 
     it('proof should be invalid', function () {
       assert.equal(isValid, false)
@@ -410,7 +420,7 @@ describe('Test basic functions', function () {
   })
 
   describe('validate good proof 5 leaves', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
       '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
@@ -419,8 +429,8 @@ describe('Test basic functions', function () {
       '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea'
     ])
     merklie.makeTree()
-    var proof = merklie.getProof(4)
-    var isValid = merklie.validateProof(proof, '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
+    const proof = merklie.getProof(4)
+    const isValid = merklie.validateProof(proof, '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
 
     it('proof should be valid', function () {
       assert.equal(isValid, true)
@@ -428,7 +438,7 @@ describe('Test basic functions', function () {
   })
 
   describe('validate good proof 5 leaves B', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
       '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
@@ -437,8 +447,8 @@ describe('Test basic functions', function () {
       '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea'
     ])
     merklie.makeTree()
-    var proof = merklie.getProof(1)
-    var isValid = merklie.validateProof(proof, '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
+    const proof = merklie.getProof(1)
+    const isValid = merklie.validateProof(proof, '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d', 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
 
     it('proof should be valid', function () {
       assert.equal(isValid, true)
@@ -446,15 +456,15 @@ describe('Test basic functions', function () {
   })
 
   describe('validate good proof BTC doubleHash', function () {
-    var merklie = new Merklie()
+    const merklie = new Merklie()
     merklie.addLeaves([
       '1a02db5db5a24c5edc5b653051d8aaaddec3f9abc30354f7df358c49fe40f735',
       'd3f3eb471e368a27f5320ff7a961bed748519139435cf8348e84ebd6225d7150',
       '7cbcf6b5378e3e43b39734baa578efa501d02abf90289547f0e6621ee959f0e3'
     ])
     merklie.makeBTCTree(true)
-    var proof = merklie.getProof(1)
-    var isValid = merklie.validateProof(proof, 'd3f3eb471e368a27f5320ff7a961bed748519139435cf8348e84ebd6225d7150', '502606f374e3e0ec3b7022bfe6631b9a9c9f5cf6dcbe74f171ef5b14676c9ee0', true)
+    const proof = merklie.getProof(1)
+    const isValid = merklie.validateProof(proof, 'd3f3eb471e368a27f5320ff7a961bed748519139435cf8348e84ebd6225d7150', '502606f374e3e0ec3b7022bfe6631b9a9c9f5cf6dcbe74f171ef5b14676c9ee0', true)
 
     it('proof should be valid', function () {
       assert.equal(isValid, true)
