@@ -65,6 +65,7 @@ const leafCount =  merklie.getLeafCount()
 ### getLeaf(index)
 
 Returns the value of the leaf at the given index as a Buffer. Returns null if no leaf exists at the given index. 
+The index can be a number, hash, or Buffer
 
 ```js
 const leafValue =  merklie.getLeaf(5)
@@ -223,3 +224,22 @@ merklie.resetTree()
          /       \      /       \        \
         A         B    C         D        E
 
+### Benchmarks
+```js
+// 75000leaves x 0.68 ops/sec ±8.67% (6 runs sampled)
+{ 
+  moe: 0.1269441674962024,
+  rme: 8.672249167890197,
+  sem: 0.049375405482770286,
+  deviation: 0.1209445492758061,
+  mean: 1.4637975113333332,
+  sample: 
+   [ 1.5254642710000001,
+     1.427776715,
+     1.5758691040000001,
+     1.33077872,
+     1.324020779,
+     1.5988754790000002 ],
+  variance: 0.01462758399952789 
+}
+```

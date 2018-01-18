@@ -79,6 +79,7 @@ module.exports = class Merklie {
    * @returns {*}
    */
   reHash (value, noHash) {
+    // If this is already a hash, there is no point to hash it again.
     if (!noHash) {
       // If this is JSON, then we need to stringify it
       if (typeof value === 'object') {
@@ -105,53 +106,83 @@ module.exports = class Merklie {
   /**
    * Add a leaf to the tree
    * @param value:
-   * @param doHash: Accepts hash value as a Buffer or hex string
+   * @param {boolean} doHash: Accepts hash value as a Buffer or hex string
+   * @param {boolean} returnHash
    * @returns {number}
    */
-  addLeaf (value, doHash) {
+  addLeaf (value, doHash, returnHash) {
     this.tree.isReady = false
+
     if (doHash) {
       // If this is JSON, then we need to stringify it
       if (typeof value === 'object') {
         value = JSON.stringify(value)
       }
+      // If this is a number, then we need to stringify it
+      if (typeof value === 'number') {
+        value = value.toString()
+      }
       // Hash the value
       value = this.hashFunction(value)
     }
-    this.tree.leaves.push(this._getBuffer(value))
-    return this.tree.leaves.length - 1
+
+    const buffer = this._getBuffer(value)
+    // Add the leaf to the tree
+    this.tree.leaves.push(buffer)
+
+    if (returnHash) {
+      return buffer.toString('hex')
+    }
+    else {
+      return this.tree.leaves.length - 1
+    }
   }
 
   /**
    * Add a leaves to the tree
    * @param valuesArray: Accepts hash values as an array of Buffers or hex strings
    * @param {boolean} doHash
-   * @returns {Array}
+   * @param {boolean} returnHash
+   * @returns {[number|string]}
    */
-  addLeaves (valuesArray, doHash) {
+  addLeaves (valuesArray, doHash, returnHash) {
     // Set Values array if empty
     valuesArray = valuesArray || []
-    const indexes = []
-
+    // Leaves are being added so the tree is not ready
     this.tree.isReady = false
-    valuesArray.forEach((value) => {
-      // If values requires hashing
-      if (doHash) {
-        value = this.hashFunction(value)
-      }
-      this.tree.leaves.push(this._getBuffer(value))
-      indexes.push(this.tree.leaves.length - 1)
+    // Add the leaf and return the index/hash
+    return valuesArray.map((value) => {
+      return this.addLeaf(value, doHash, returnHash)
     })
-    return indexes
   }
 
   /**
    * Returns a leaf at the given index
-   * @param {number} index
+   * @param index
    * @param {boolean} asBinary
    * @returns {*}
    */
   getLeaf (index, asBinary) {
+    if (typeof index === 'number') {
+      // do nothing
+    }
+    else if (index instanceof Buffer) {
+      index = this._bufferIndex(index)
+      // if the index is undefined, null or -1
+      if (index === 'undefined' || index === null || index === -1) {
+        return null
+      }
+    }
+    else if (typeof index === 'string' && this._isHex(index)) {
+      index = this._bufferIndex(this._getBuffer(index))
+      // if the index is undefined, null or -1
+      if (index === 'undefined' || index === null || index === -1) {
+        return null
+      }
+    }
+    else {
+      throw new Error(`Bad Value - "${index}" should be a number, hex string, or buffer`)
+    }
     // if index is out of array bounds
     if (index < 0 || index > this.tree.leaves.length - 1) {
       return null
@@ -162,6 +193,18 @@ module.exports = class Merklie {
     else {
       return this.tree.leaves[index].toString('hex')
     }
+  }
+
+  /**
+   * Returns leaves at the given indexes
+   * @param indexes
+   * @param {boolean} asBinary
+   * @returns {*}
+   */
+  getLeaves (indexes, asBinary) {
+    return indexes.map(index => {
+      return this.getLeaf(index, asBinary)
+    })
   }
 
   /**
@@ -186,11 +229,10 @@ module.exports = class Merklie {
    * @returns {boolean}
    */
   makeTree (doubleHash) {
-    const leafCount = this.tree.leaves.length
     this.tree.isReady = false
 
-    // skip this whole process if there are no leaves added to the tree
-    if (leafCount > 0) {
+    // Only run this process if there are leaves in the tree
+    if (this.tree.leaves.length > 0) {
       this.tree.levels = []
       this.tree.levels.unshift(this.tree.leaves)
       while (this.tree.levels[0].length > 1) {
@@ -207,11 +249,10 @@ module.exports = class Merklie {
    * @returns {boolean}
    */
   makeBTCTree (doubleHash) {
-    const leafCount = this.tree.leaves.length
     this.tree.isReady = false
 
     // skip this whole process if there are no leaves added to the tree
-    if (leafCount > 0) {
+    if (this.tree.leaves.length > 0) {
       this.tree.levels = []
       this.tree.levels.unshift(this.tree.leaves)
       while (this.tree.levels[0].length > 1) {
@@ -255,6 +296,20 @@ module.exports = class Merklie {
       return null
     }
 
+    // Convert Index to a number
+    if (typeof index === 'number') {
+      // do nothing
+    }
+    else if (index instanceof Buffer) {
+      index = this._bufferIndex(index)
+    }
+    else if (typeof index === 'string' && this._isHex(index)) {
+      index = this._bufferIndex(this._getBuffer(index))
+    }
+    else {
+      throw new Error(`Bad Value - "${index}" should be a number, hex string, or buffer`)
+    }
+
     // If the index it out of the bounds of the leaf array
     if (index < 0 || index > this.tree.levels[currentRowIndex].length - 1) {
       return null
@@ -286,8 +341,11 @@ module.exports = class Merklie {
       // set index to the parent index
       index = Math.floor(index / 2)
     }
-    // Return the proof
-    return proof
+    // Return the proof as object
+    return proof.reduce(function(result, item, index) {
+      result[index] = item // [left, right]
+      return result
+    }, {})
   }
 
   /**
@@ -304,12 +362,12 @@ module.exports = class Merklie {
     merkleRoot = this._getBuffer(merkleRoot)
 
     // If no siblings, single item tree, so the hash should also be the root
-    if (proof.length === 0) {
-      return targetHash.toString('hex') === merkleRoot.toString('hex')
+    if (!proof[0]) {
+      return targetHash.equals(merkleRoot)
     }
 
     let proofHash = targetHash
-    for (let x = 0; x < proof.length; x++) {
+    for (let x in proof) {
       // If the sibling is a left node
       if (proof[x].left) {
         // If this is double hashed
@@ -335,7 +393,7 @@ module.exports = class Merklie {
       }
     }
     // compare the proof to the root
-    return proofHash.toString('hex') === merkleRoot.toString('hex')
+    return proofHash.equals(merkleRoot)
   }
 
   /**
@@ -403,6 +461,22 @@ module.exports = class Merklie {
     else {
       throw new Error(`Bad hex value - "${value}"`)
     }
+  }
+
+  _bufferIndex (buffer) {
+    let a
+    let i = this.tree.leaves.length
+    while (i--) {
+      a = this.tree.leaves[i]
+      if (a.equals(buffer)) {
+        const index = i
+        // Break the loop by setting it "false"
+        i = -1
+        // Return index
+        return index
+      }
+    }
+    return -1
   }
 
   /**

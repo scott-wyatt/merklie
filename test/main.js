@@ -81,6 +81,22 @@ describe('Test basic functions', function () {
     })
   })
 
+  describe('make get leaf by hash', function () {
+    const merklie = new Merklie()
+    const leaves = [
+      'a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb',
+      'cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c'
+    ]
+
+    const addedLeaves = merklie.addLeaves(leaves)
+    merklie.makeTree()
+
+    it('merkle leaf hash should match', function () {
+      const leaf = merklie.getLeaf(leaves[0])
+      assert.equal(leaves[0], leaf)
+    })
+  })
+
   describe('make tree with addLeaves buffers', function () {
     const merklie = new Merklie()
     merklie.addLeaves([
@@ -184,8 +200,27 @@ describe('Test basic functions', function () {
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
-      assert.equal(targetProof0.length, 1)
-      assert.equal(targetProof1.length, 1)
+      assert.equal(Object.keys(targetProof0).length, 1)
+      assert.equal(Object.keys(targetProof1).length, 1)
+    })
+  })
+
+
+  describe('get proof with hash', function () {
+    const hashes = []
+    hashes.push('a292780cc748697cb499fdcc8cb89d835609f11e502281dfe3f6690b1cc23dcb')
+    hashes.push('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
+
+    const merklie = new Merklie()
+    merklie.addLeaves(hashes)
+    merklie.makeTree()
+    const targetProof0 = merklie.getProof(hashes[0])
+    const targetProof1 = merklie.getProof(hashes[1])
+
+    it('merkle root value should be correct', function () {
+      assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
+      assert.equal(Object.keys(targetProof0).length, 1)
+      assert.equal(Object.keys(targetProof1).length, 1)
     })
   })
 
@@ -663,7 +698,7 @@ describe('Test other hash functions', function () {
   })
 
   describe('make SHA3-512 tree with 2 leaves', function () {
-    var merklie = new Merklie({ hashType: 'SHA3-512' })
+    const merklie = new Merklie({ hashType: 'SHA3-512' })
     merklie.addLeaves([
       '004a237ea808cd9375ee9db9f85625948a890c54e2c30f736f54c969074eb56f0ff3d43dafb4b40d5d974acc1c2a68c046fa4d7c2c20cab6df956514040d0b8b',
       '0b43a85d08c05252d0e23c96bc6b1bda11dfa787049ff452b3c86f4c6135e870c058c05131f199ef8619cfac937a736bbc936a667e4d96a5bf68e4056ce5fdce'
@@ -682,7 +717,7 @@ describe('Test other hash functions', function () {
   })
 
   describe('make unhashed tree with 2 leaves', function () {
-    var merklie = new Merklie({ hashType: 'none' })
+    const merklie = new Merklie({ hashType: 'none' })
     merklie.addLeaves([
       '004a237ea808cd9375ee9db9f85625948a890c54e2c30f736f54c969074eb56f0ff3d43dafb4b40d5d974acc1c2a68c046fa4d7c2c20cab6df956514040d0b8b',
       '0b43a85d08c05252d0e23c96bc6b1bda11dfa787049ff452b3c86f4c6135e870c058c05131f199ef8619cfac937a736bbc936a667e4d96a5bf68e4056ce5fdce'
