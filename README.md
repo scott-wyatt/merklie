@@ -62,10 +62,12 @@ Returns the number of leaves that are currently added to the tree.
 const leafCount =  merklie.getLeafCount()
 ```
 
-### getLeaf(index)
+### getLeaf(index, asBinary)
+@param index: number, hash, or Buffer
 
-Returns the value of the leaf at the given index as a Buffer. Returns null if no leaf exists at the given index. 
-The index can be a number, hash, or Buffer
+@param asBinary: boolean
+
+Returns the value of the leaf at the given index as a hash or a Buffer. Returns null if no leaf exists at the given index.
 
 ```js
 const leafValue =  merklie.getLeaf(5)
@@ -117,18 +119,21 @@ const rootValue = merklie.getMerkleRoot()
 ```
 
 ### getProof(index, asBinary)
+@param index: can be a number, hash, buffer
 
-Returns the proof as an array of hash objects or array of Buffers for the leaf at the given index. If the tree is not ready or no leaf exists at the given index, null is returned.  
+@param asBinary: boolean
+
+Returns the proof as an object of hash objects or array of Buffers for the leaf at the given index. If the tree is not ready or no leaf exists at the given index, null is returned.  
 
 ```js
 const proof = merklie.getProof(2)
 
 // By default, an array of hash objects is returned
 // example: 
-// proof == [
-//   { right: '09096dbc49b7909917e13b795ebf289ace50b870440f10424af8845fb7761ea5' },
-//   { right: 'ed2456914e48c1e17b7bd922177291ef8b7f553edf1b1f66b6fc1a076524b22f' },
-//   { left: 'eac53dde9661daf47a428efea28c81a021c06d64f98eeabbdcff442d992153a8' }
+// proof = {
+//   0 :{ right: '09096dbc49b7909917e13b795ebf289ace50b870440f10424af8845fb7761ea5' },
+//   1: { right: 'ed2456914e48c1e17b7bd922177291ef8b7f553edf1b1f66b6fc1a076524b22f' },
+//   2: { left: 'eac53dde9661daf47a428efea28c81a021c06d64f98eeabbdcff442d992153a8' }
 // ]
 
 const proof = merklie.getProof(2, true)
@@ -136,21 +141,18 @@ const proof = merklie.getProof(2, true)
 // With asBinary set to true, an array of Buffers is returned 
 // 0x00 indicated 'left', 0x01 indicates 'right'
 // example: 
-// proof == [
-//   <Buffer 01>,
-//   <Buffer 09096dbc49b7909917e13b795ebf289ace50b870440f10424af8845fb7761ea5>,
-//   <Buffer 01>
-//   <Buffer ed2456914e48c1e17b7bd922177291ef8b7f553edf1b1f66b6fc1a076524b22f>,
-//   <Buffer 00>
-//   <Buffer eac53dde9661daf47a428efea28c81a021c06d64f98eeabbdcff442d992153a8>
-// ]
+// proof == {
+//   0: { <Buffer 01>: <Buffer 09096dbc49b7909917e13b795ebf289ace50b870440f10424af8845fb7761ea5>},
+//   1: { <Buffer 01>: <Buffer ed2456914e48c1e17b7bd922177291ef8b7f553edf1b1f66b6fc1a076524b22f>},
+//   2: { <Buffer 00>: <Buffer eac53dde9661daf47a428efea28c81a021c06d64f98eeabbdcff442d992153a8>}
+// }
 ```
 
-The proof array contains a set of merkle sibling objects. Each object contains the sibling hash, with the key value of either right or left. The right or left value tells you where that sibling was in relation to the current hash being evaluated. This information is needed for proof validation, as explained in the following section.
+The proof object contains a set of merkle sibling objects. Each object contains the sibling hash, with the key value of either right or left. The right or left value tells you where that sibling was in relation to the current hash being evaluated. This information is needed for proof validation, as explained in the following section.
 
 ### validateProof(proof, targetHash, merkleRoot, doubleHash)
 
-Returns a boolean indicating whether or not the proof is valid and correctly connects the targetHash to the merkleRoot. Proof is a proof array as supplied by the 'getProof' method. The targetHash and merkleRoot parameters must be Buffers or hex strings. Setting doubleHash to true will double each hash operation to match the Bitcoin merkle tree style.
+Returns a boolean indicating whether or not the proof is valid and correctly connects the targetHash to the merkleRoot. Proof is a proof object as supplied by the 'getProof' method. The targetHash and merkleRoot parameters must be Buffers or hex strings. Setting doubleHash to true will double each hash operation to match the Bitcoin merkle tree style.
 
 ```js
 const proof = [

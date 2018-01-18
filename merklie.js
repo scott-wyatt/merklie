@@ -73,6 +73,22 @@ module.exports = class Merklie {
   }
 
   /**
+   * Get the Root hash as String if tree is ready
+   * @returns {null|string}
+   */
+  get root () {
+    return this.getMerkleRoot(false)
+  }
+
+  /**
+   * Get the Ready State of the Tree
+   * @returns {boolean}
+   */
+  get ready () {
+    return this.getTreeReadyState()
+  }
+
+  /**
    * Returns a re-hashed hex
    * @param {*} value
    * @param {boolean} noHash
@@ -510,7 +526,8 @@ module.exports = class Merklie {
 
   /**
    * Calculates the next level of node when building the merkle tree
-   * These values are calcalated off of the current highest level, level 0 and will be prepended to the levels array
+   * These values are calculated off of the current highest level
+   * level 0 and will be prepended to the levels array
    * @param doubleHash
    * @returns {Array}
    * @private
