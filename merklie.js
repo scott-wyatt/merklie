@@ -12,7 +12,11 @@ module.exports = class Merklie {
     this.tree.leaves = []
     this.tree.levels = []
     this.tree.isReady = false
+    // The difficulty of the hashing
+    this.difficulty = 0
+    // The default hash type
     this.hashType = 'sha256'
+    // Valid hash types
     this.validHashTypes = ['SHA3-224','SHA3-256','SHA3-384','SHA3-512','sha256', 'md5', 'none']
 
     // if tree options were supplied, then process them
@@ -20,7 +24,9 @@ module.exports = class Merklie {
       // set the hash function to the user's choice
       this.hashType = treeOptions.hashType
     }
-
+    if (treeOptions && treeOptions.difficulty) {
+      this.difficulty = treeOptions.difficulty
+    }
   }
 
   /**
@@ -305,14 +311,14 @@ module.exports = class Merklie {
    */
   getProof (index, asBinary) {
     const currentRowIndex = this.tree.levels.length - 1
-    const proof = []
+    let proof = []
 
     // If the Tree isn't ready return null
     if (!this.tree.isReady) {
       return null
     }
 
-    // Convert Index to a number
+    // Convert index to a number
     if (typeof index === 'number') {
       // do nothing
     }
@@ -358,10 +364,12 @@ module.exports = class Merklie {
       index = Math.floor(index / 2)
     }
     // Return the proof as object
-    return proof.reduce(function(result, item, index) {
+    proof = proof.reduce(function(result, item, index) {
       result[index] = item // [left, right]
       return result
     }, {})
+    console.log('PROOF',proof)
+    return proof
   }
 
   /**

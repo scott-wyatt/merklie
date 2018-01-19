@@ -193,7 +193,7 @@ describe('Test basic functions', function () {
     hashes.push('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
 
     const merklie = new Merklie()
-    merklie.addLeaves(hashes)
+    const leaves = merklie.addLeaves(hashes, false, true)
     merklie.makeTree()
     const targetProof0 = merklie.getProof(0)
     const targetProof1 = merklie.getProof(1)
@@ -201,7 +201,9 @@ describe('Test basic functions', function () {
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
       assert.equal(Object.keys(targetProof0).length, 1)
-      assert.equal(Object.keys(targetProof1).length, 1)
+      assert.equal(Object.keys(targetProof1).length, 1),
+      assert.equal(merklie.validateProof(targetProof0, leaves[0], mRoot.toString('hex')), true)
+      assert.equal(merklie.validateProof(targetProof1, leaves[1], mRoot.toString('hex')), true)
     })
   })
 
@@ -212,26 +214,38 @@ describe('Test basic functions', function () {
     hashes.push('cb4990b9a8936bbc137ddeb6dcab4620897b099a450ecdc5f3e86ef4b3a7135c')
 
     const merklie = new Merklie()
-    merklie.addLeaves(hashes)
+    const leaves = merklie.addLeaves(hashes, false, true)
     merklie.makeTree()
     const targetProof0 = merklie.getProof(hashes[0])
     const targetProof1 = merklie.getProof(hashes[1])
 
     it('merkle root value should be correct', function () {
+
       assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
       assert.equal(Object.keys(targetProof0).length, 1)
       assert.equal(Object.keys(targetProof1).length, 1)
+      assert.equal(merklie.validateProof(targetProof0, leaves[0], mRoot.toString('hex')), true)
+      assert.equal(merklie.validateProof(targetProof1, leaves[1], mRoot.toString('hex')), true)
     })
   })
 
   describe('make tree with addLeaf buffers', function () {
     const merklie = new Merklie()
-    merklie.addLeaf(bLeft)
-    merklie.addLeaf(bRight)
+    const leaves = [
+      merklie.addLeaf(bLeft),
+      merklie.addLeaf(bRight)
+    ]
     merklie.makeTree()
+
+    const bufferedLeaves = [
+      merklie.getLeaf(leaves[0], true),
+      merklie.getLeaf(leaves[1], true),
+    ]
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), mRoot.toString('hex'))
+      assert.equal(bufferedLeaves[0].equals(bLeft), true)
+      assert.equal(bufferedLeaves[1].equals(bRight), true)
     })
   })
 
@@ -257,41 +271,67 @@ describe('Test basic functions', function () {
 
   describe('make tree with 5 leaves', function () {
     const merklie = new Merklie()
-    merklie.addLeaves([
+    const leaves = merklie.addLeaves([
       'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
       '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
       '2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6',
       '18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4',
       '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea'
-    ])
+    ], false, true)
+
     merklie.makeTree()
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
+    })
+
+    it('should get proof for each leaf and it should be valid', function () {
+      const root = merklie.getMerkleRoot()
+      leaves.forEach(leaf => {
+        const proof = merklie.getProof(leaf)
+        assert.equal(merklie.validateProof(proof, leaf, root), true)
+      })
     })
   })
 
   describe('make tree with 5 leaves individually needing hashing', function () {
     const merklie = new Merklie()
-    merklie.addLeaf('a', true)
-    merklie.addLeaf('b', true)
-    merklie.addLeaf('c', true)
-    merklie.addLeaf('d', true)
-    merklie.addLeaf('e', true)
+    const leaves = [
+      merklie.addLeaf('a', true, true),
+      merklie.addLeaf('b', true, true),
+      merklie.addLeaf('c', true, true),
+      merklie.addLeaf('d', true, true),
+      merklie.addLeaf('e', true, true)
+    ]
     merklie.makeTree()
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
     })
+
+    it('should get proof for each leaf and it should be valid', function () {
+      const root = merklie.getMerkleRoot()
+      leaves.forEach(leaf => {
+        const proof = merklie.getProof(leaf)
+        assert.equal(merklie.validateProof(proof, leaf, root), true)
+      })
+    })
   })
 
   describe('make tree with 5 leaves at once needing hashing', function () {
     const merklie = new Merklie()
-    merklie.addLeaves(['a', 'b', 'c', 'd', 'e'], true)
+    const leaves = merklie.addLeaves(['a', 'b', 'c', 'd', 'e'], true, true)
     merklie.makeTree()
 
     it('merkle root value should be correct', function () {
       assert.equal(merklie.getMerkleRoot().toString('hex'), 'd71f8983ad4ee170f8129f1ebcdd7440be7798d8e1c80420bf11f1eced610dba')
+    })
+    it('should get proof for each leaf and it should be valid', function () {
+      const root = merklie.getMerkleRoot()
+      leaves.forEach(leaf => {
+        const proof = merklie.getProof(leaf)
+        assert.equal(merklie.validateProof(proof, leaf, root), true)
+      })
     })
   })
 
