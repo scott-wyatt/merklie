@@ -29,7 +29,7 @@ const merklie = new Merklie(treeOptions) // treeOptions is optional
 
 ## Methods
 
-### addLeaf(value, doHash)
+### addLeaf(value, doHash, returnType)
 
 Adds a value as a leaf to the tree. The value must be either a Buffer or a hex string, otherwise set the optional doHash to true to have your value hashed prior to being added to the tree. It returns the index of the leaf added. 
 
@@ -41,7 +41,7 @@ merklie.addLeaf(hexData)
 merklie.addLeaf(otherData, true)
 ```
 
-### addLeaves(valueArray, doHash)
+### addLeaves(valueArray, doHash, returnType)
 
 Adds an array of values as leaves to the tree. The values must be either a Buffers or a hex strings, otherwise set the optional doHash to true to have your values hashed prior to being added to the tree. Returns the indexes of the leaves added.
 
@@ -228,20 +228,20 @@ merklie.resetTree()
 
 ### Benchmarks
 ```js
-// 75000leaves x 0.68 ops/sec ±8.67% (6 runs sampled)
+// 75000 leaves x 0.77 ops/sec ±9.02% (6 runs sampled)
 { 
-  moe: 0.1269441674962024,
-  rme: 8.672249167890197,
-  sem: 0.049375405482770286,
-  deviation: 0.1209445492758061,
-  mean: 1.4637975113333332,
+  moe: 0.1179683061334842,
+  rme: 9.02469439155465,
+  sem: 0.045884210864832436,
+  deviation: 0.1123929038691075,
+  mean: 1.3071723098333334,
   sample: 
-   [ 1.5254642710000001,
-     1.427776715,
-     1.5758691040000001,
-     1.33077872,
-     1.324020779,
-     1.5988754790000002 ],
-  variance: 0.01462758399952789 
+   [ 1.339671007,
+     1.233346814,
+     1.365459061,
+     1.187010785,
+     1.488181433,
+     1.229364759 ],
+  variance: 0.012632164840130439
 }
 ```
