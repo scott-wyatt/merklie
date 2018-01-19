@@ -129,10 +129,10 @@ module.exports = class Merklie {
    * Add a leaf to the tree
    * @param value:
    * @param {boolean} doHash: Accepts hash value as a Buffer or hex string
-   * @param {boolean} returnHash
-   * @returns {number}
+   * @param {boolean|string} returnType
+   * @returns {number|string|Buffer}
    */
-  addLeaf (value, doHash, returnHash) {
+  addLeaf (value, doHash, returnType) {
     this.tree.isReady = false
 
     if (doHash) {
@@ -151,12 +151,16 @@ module.exports = class Merklie {
     const buffer = this._getBuffer(value)
     // Add the leaf to the tree
     this.tree.leaves.push(buffer)
+    // this.tree.leaves[value] = buffer
 
-    if (returnHash) {
-      return buffer.toString('hex')
-    }
-    else {
+    if (!returnType) {
       return this.tree.leaves.length - 1
+    }
+    else if (returnType === 'buffer') {
+      return buffer
+    }
+    else if (returnType || returnType === 'hash') {
+      return value
     }
   }
 
@@ -164,17 +168,17 @@ module.exports = class Merklie {
    * Add a leaves to the tree
    * @param valuesArray: Accepts hash values as an array of Buffers or hex strings
    * @param {boolean} doHash
-   * @param {boolean} returnHash
+   * @param {boolean|string} returnType
    * @returns {[number|string]}
    */
-  addLeaves (valuesArray, doHash, returnHash) {
+  addLeaves (valuesArray, doHash, returnType) {
     // Set Values array if empty
     valuesArray = valuesArray || []
     // Leaves are being added so the tree is not ready
     this.tree.isReady = false
     // Add the leaf and return the index/hash
     return valuesArray.map((value) => {
-      return this.addLeaf(value, doHash, returnHash)
+      return this.addLeaf(value, doHash, returnType)
     })
   }
 
@@ -462,7 +466,7 @@ module.exports = class Merklie {
       this.tree.leaves.push(this._getBuffer(leaf))
     })
 
-    // Rebuild the tree to ready state
+    // Rebuild the hydrated tree to ready state
     return this.makeTree()
   }
   /**
